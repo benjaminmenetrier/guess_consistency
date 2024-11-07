@@ -211,20 +211,20 @@ with
 \end{align}
 
 \subsubsection{Non-classic variable change}
-Another new variable $\delta \mathbf{w}_k \in \mathbb{R}^m$ can be defined as:
+Another new variable $\delta \mathbf{w} \in \mathbb{R}^m$ can be defined as:
 \begin{align}
-\delta \mathbf{w}_k & = \mathbf{U}^\mathrm{T} \mathbf{B}^{-1} \left(\mathbf{x}_k - \mathbf{x}^b\right) \nonumber \\
+\delta \mathbf{w} & = \mathbf{U}^\mathrm{T} \mathbf{B}^{-1} \left(\mathbf{x} - \mathbf{x}^b\right) \nonumber \\
  & = \mathbf{U}^\mathrm{T} \mathbf{B}^{-1} \left(\delta \mathbf{x}_k - \delta \mathbf{x}^b_k\right)
 \end{align}
 leading to
 \begin{align}
 \label{eq:deltax_to_deltaw}
-\boxed{\delta \mathbf{x}_k = \mathbf{U} \delta \mathbf{w}_k + \delta \mathbf{x}^b_k}
+\boxed{\delta \mathbf{x}_k = \mathbf{U} \delta \mathbf{w} + \delta \mathbf{x}^b_k}
 \end{align}
-The link between $\delta \mathbf{w}_k$ and $\delta \mathbf{v}_k$ is straightforward:
+The link between $\delta \mathbf{w}$ and $\delta \mathbf{v}_k$ is straightforward:
 \begin{align}
 \label{eq:link_deltaw-deltav}
-\delta \mathbf{v}_k = \delta \mathbf{w}_k + \delta \mathbf{v}^b_k
+\delta \mathbf{v}_k = \delta \mathbf{w} + \delta \mathbf{v}^b_k
 \end{align}
 Using variable change \eqref{eq:deltax_to_deltaw} and applying $\mathbf{U}^\mathrm{T}$ on both sides, the linear system \eqref{eq:inc} can be transformed into:
 \begin{align}
@@ -280,7 +280,7 @@ Thus:
 \begin{itemize}
 \item for $k = 1$:
 \begin{align}
-\delta \mathbf{x}^b_1 = \mathbf{x}^g_1 - \mathbf{x}^b = 0
+\delta \mathbf{x}^b_1 = \mathbf{x}^b - \mathbf{x}^g_1 = 0
 \end{align}
 \item for $k > 1$:
 \begin{align}
@@ -848,285 +848,8 @@ and
 \end{align}
 Since $\boldsymbol{\Gamma}_k^{1/2}\boldsymbol{\Delta}_{i \rightarrow k} = \boldsymbol{\Delta}_{i \rightarrow k}  \boldsymbol{\Gamma}_i^{1/2}$, the projective $\mathbf{B}$ family condition \eqref{eq:projective_definition_U} is verified.
 
+\section*{Acknowledgments}
+Many thanks to Mayeul Destouches (CNRM) for his careful review.
+
+
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Full $\mathbf{B}$ preconditioning}
-
-\subsection{Iterative solver}
-A new variable $\delta \overline{\mathbf{x}}_k \in \mathbb{R}^n$ is defined as:
-\begin{align}
-\delta \overline{\mathbf{x}}_k = \mathbf{B}_k^{-1} \delta \mathbf{x}_k \ \Leftrightarrow \ \delta \mathbf{x}_k = \mathbf{B}_k \delta \overline{\mathbf{x}}_k
-\end{align}
-Linear system \eqref{eq:inc} is transformed into:
-\begin{align}
-\label{eq:inc_B}
-\boxed{\mathbf{A}^{\overline{\mathbf{x}}}_k \delta \overline{\mathbf{x}}^a_k = \mathbf{b}^{\overline{\mathbf{x}}}_k}
-\end{align}
-with $\mathbf{A}^{\overline{\mathbf{x}}}_k \in \mathbb{R}^{n \times n}$ and $\mathbf{b}^{\overline{\mathbf{x}}}_k \in \mathbb{R}^{n}$ defined as:
-\begin{align}
-\mathbf{A}^{\overline{\mathbf{x}}}_k & = \mathbf{I}_n + \mathbf{H}_k^\mathrm{T} \mathbf{R}^{-1} \mathbf{H}_k \mathbf{B}_k \\
-\mathbf{b}^{\overline{\mathbf{x}}}_k & =  \delta \overline{\mathbf{x}}^b_k + \mathbf{H}_k^\mathrm{T} \mathbf{R}^{-1} \mathbf{d}_k
-\end{align}
-
-The PLanczosIF method with a preconditioner $\mathbf{P}_k = \mathbf{B}\mathbf{C}_k$, where $\mathbf{C}_k \in \mathbb{R}^{n \times n}$ and $\mathbf{P}_k \in \mathbb{R}^{n \times n}$ is detailed in algorithm \ref{algo:planczosif}.\\
-
-A common (but not unique) way to define the preconditioner $\mathbf{P}_k = \mathbf{B}\mathbf{C}_k$ consists in using the spectral Limited Memory Preconditioner (LMP) approximated from the Ritz pairs:
-\begin{itemize}
-\item For the first outer iteration ($k=1$): $\mathbf{C}_1 = \mathbf{I}_n$.
-\item For subsequent outer iteration ($k>1$):
-\begin{align}
-\mathbf{C}_{k+1} = \mathbf{C}_k + \overline{\mathbf{V}}_k \left(\mathbf{\Lambda}_k^{-1} - \mathbf{I}_{I_k}\right) \mathbf{V}_k^\mathrm{T}
-\end{align}
-where
-\begin{align}
-\overline{\mathbf{V}}_k & = \mathbf{C}_k \underline{\overline{\mathbf{V}}}_k \\
-\mathbf{V}_k & = \mathbf{B} \overline{\mathbf{V}}_k
-\end{align}
-\end{itemize}
-It should be noted that the Ritz vectors are orthogonal with respect to the $\mathbf{P}_k$-inner product:
-\begin{align}
-\underline{\overline{\mathbf{V}}}_k^\mathrm{T} \mathbf{P}_k \underline{\overline{\mathbf{V}}}_k = \mathbf{I}_{I_k}
-\end{align}
-As a consequence, the inverse of $\mathbf{C}_{k+1}$ can be easily computed from the Woodbury matrix identity:
-\begin{align}
-\mathbf{C}_{k+1}^{-1} & = \mathbf{C}_k^{-1} - \mathbf{C}_k^{-1} \overline{\mathbf{V}}_k \left(\left(\mathbf{\Lambda}_k^{-1} - \mathbf{I}_{I_k}\right)^{-1}+\mathbf{V}_k^\mathrm{T} \mathbf{C}_k^{-1} \overline{\mathbf{V}}_k\right)^{-1} \mathbf{V}_k^\mathrm{T} \mathbf{C}_k^{-1} \nonumber \\
-& = \left(\mathbf{I}_n-\underline{\overline{\mathbf{V}}}_k \left(\left(\mathbf{\Lambda}_k^{-1} - \mathbf{I}_{I_k}\right)^{-1}+\mathbf{I}_{I_k}\right)^{-1} \mathbf{V}_k^\mathrm{T}\right)\mathbf{C}_k^{-1} \nonumber \\
-& = \left(\mathbf{I}_n+\underline{\overline{\mathbf{V}}}_k \left(\mathbf{\Lambda}_k-\mathbf{I}_{I_k}\right) \mathbf{V}_k^\mathrm{T}\right)\mathbf{C}_k^{-1}
-\end{align}
-
-\begin{algorithm}[!ht]
-\caption{PLanczosIF algorithm with a preconditioner $\mathbf{P}_k = \mathbf{B}\mathbf{C}_k$\label{algo:planczosif}}
-\begin{algorithmic}
-\STATE Set the number of iterations: $I_k$
-\STATE $  $
-\STATE Objects sizes:
-\STATE $\alpha_i$, $\beta_i \in \mathbb{R}$ for $0 \le i \le I_k$
-\STATE $\mathbf{q}_i$, $\mathbf{r}_i$, $\overline{\mathbf{t}}_i$, $\mathbf{t}_i$, $\mathbf{v}_i$, $\mathbf{w}_i$, $\overline{\mathbf{z}}_i$, $\mathbf{z}_i \in \mathbb{R}^n$ for $0 \le i \le I_k$
-\STATE $\mathbf{e_1} = [1,0,\dots,0]^\mathrm{T} \in \mathbb{R}^{I_k}$
-\STATE $\mathbf{T}$, $\boldsymbol{\Theta}$, $\mathbf{Y}$, $\boldsymbol{\Lambda}_k \in \mathbb{R}^{I_k \times I_k}$
-\STATE $\underline{\mathbf{V}}$, $\underline{\overline{\mathbf{V}}}_k \in \mathbb{R}^{n \times I_k}$
-\STATE $  $
-\STATE Initialization:
-\STATE $\mathbf{v}_0 = 0$
-\STATE $\mathbf{r}_0 = \delta \overline{\mathbf{x}}^b_k + \mathbf{H}_k^\mathrm{T} \mathbf{R}^{-1} \mathbf{d}_k$
-\STATE $\overline{\mathbf{t}}_0 = \mathbf{C}_k \mathbf{r}_0$
-\STATE $\mathbf{t}_0 = \mathbf{B} \overline{\mathbf{t}}_0$
-\STATE $\beta_0 = \sqrt{\mathbf{r}_0^\mathrm{T} \mathbf{t}_0}$
-\STATE $\mathbf{v}_1 = \mathbf{r}_0/\beta_0$
-\STATE $\overline{\mathbf{z}}_1 = \overline{\mathbf{t}}_0/\beta_0$
-\STATE $\mathbf{z}_1 = \mathbf{t}_0/\beta_0$
-\STATE $\beta_1 = 0$
-\STATE $  $
-\FOR{$1 \le i \le I_k$}
-\STATE Store the Lanczos vector $\mathbf{v}_i$ as the $i^\text{th}$ column of $\underline{\mathbf{V}}$
-\STATE Update scalars and vectors:
-\STATE $\mathbf{q}_i = \overline{\mathbf{z}}_i + \mathbf{H}_k^\mathrm{T} \mathbf{R}^{-1} \mathbf{H}_k \mathbf{z}_i - \beta_i \mathbf{v}_{i-1}$
-\STATE $\alpha_i = \mathbf{q}_i^\mathrm{T} \mathbf{z}_i$
-\STATE $\mathbf{w}_i = \mathbf{q}_i - \alpha_i \mathbf{v}_i$
-\STATE $\overline{\mathbf{t}}_i = \mathbf{C}_k \mathbf{w}_i$
-\STATE $\mathbf{t}_i = \mathbf{B} \overline{\mathbf{t}_i}$
-\STATE $\beta_{i+1} = \sqrt{\mathbf{w}_i \mathbf{z}_i}$
-\STATE $\mathbf{v}_{i+1} = \mathbf{w}_i/\beta_{i+1}$
-\STATE $\overline{\mathbf{z}}_{i+1} = \overline{\mathbf{t}}_i/\beta_{i+1}$
-\STATE $\mathbf{z}_{i+1} = \mathbf{t}_i/\beta_{i+1}$
-\STATE Fill the tridiagonal matrix $\mathbf{T}$:
-\STATE $T_{ii} = \alpha_i$
-\IF{$i>1$}
-\STATE $T_{(i-1)i} = T_{i(i-1)} = \beta_i$
-\ENDIF
-\ENDFOR
-\STATE Compute $\left(\boldsymbol{\Theta},\mathbf{Y}\right)$, the eigendecomposition of $\mathbf{T} = \mathbf{Y} \boldsymbol{\Theta} \mathbf{Y}^\mathrm{T}$
-\STATE Compute the analysis increment: $\delta \mathbf{x}^a_k = \mathbf{P}_k \underline{\mathbf{V}} \mathbf{Y} \boldsymbol{\Theta}^{-1} \mathbf{Y}^\mathrm{T} \left(\beta_0 \mathbf{e}_1\right)$
-\STATE Store the Ritz pairs $\left(\boldsymbol{\Lambda}_k,\underline{\overline{\mathbf{V}}}_k \right) = \left(\boldsymbol{\Theta},\underline{\mathbf{V}} \mathbf{Y}\right)$
-\end{algorithmic}
-\end{algorithm}
-
-\FloatBarrier
-
-\subsection{Equivalence condition for preconditioners}
-Both approaches are equivalent if the preconditioners are linked via:
-\begin{align}
-\label{eq:eq_cond_1}
-\mathbf{P}^{1/2}_k = \mathbf{Q}^{1/2}_k \mathbf{U}
-\end{align}
-which is verified for the spectral preconditioner approximated with the Ritz pairs. Figure \ref{fig:map} summarize the relationships between the different quantities.
-
-\begin{figure}[!ht]
-\begin{center}
-\tikzstyle{field}=[draw,thin,rounded corners,inner sep=3pt]
-\begin{tikzpicture}[auto,>=latex]
-\node[field] (a) {$\underline{\widetilde{\mathbf{V}}}_k$};
-\node[field,below of=a,node distance=2cm] (b) {$\delta \mathbf{v}_k, \widetilde{\mathbf{V}}_k$};
-\node[field,below of=b,node distance=4cm,xshift=-5cm] (c) {$\delta \overline{\mathbf{x}}_k,\overline{\mathbf{V}}_k$};
-\node[field,below of=b,node distance=4cm,xshift=5cm] (d) {$\delta \mathbf{x}_k,\mathbf{V}_k$};
-\node[field,below of=c,node distance=2cm] (e) {$\underline{\overline{\mathbf{V}}}_k$};
-
-\node[circle,draw,inner sep=1pt,above of=a,node distance=0.9cm,xshift=-0.9cm] (ortho_lanczos) {$\perp_{\mathbf{I}_{I_k}}$};
-\node[circle,draw,inner sep=1pt,below of=e,node distance=0.9cm,xshift=-0.9cm] (ortho_planczosif) {$\perp_{\mathbf{P}_k}$};
-
-
-\node[above of=c,node distance=1.8cm] (leftside) {};
-\node[above of=d,node distance=1.8cm] (rightside) {};
-\node[right of=c,node distance=1.6cm] (bottomsideleft) {};
-\node[left of=d,node distance=1.8cm] (bottomsideright) {};
-\node[above of=bottomsideleft,node distance=5.0cm] (topsideleft) {};
-\node[above of=bottomsideright,node distance=5.0cm] (topsideright) {};
-\node[below of=e,node distance=2.4cm,xshift=-0.5cm] (bottomlabel1) {\begin{tabular}{@{\hspace{0.07cm}}c@{\hspace{0.07cm}}}
-Model \\
-space
-\end{tabular}};
-\node[right of=bottomlabel1,node distance=5.8cm] (bottomlabel2) {\begin{tabular}{@{\hspace{0.07cm}}c@{\hspace{0.07cm}}}
-Control \\
-space
-\end{tabular}};
-\node[right of=bottomlabel1,node distance=10.6cm] (bottomlabel3) {\begin{tabular}{@{\hspace{0.07cm}}c@{\hspace{0.07cm}}}
-Model \\
-space
-\end{tabular}};
-
-\path[->,thick] ([xshift=-0.1cm]a.south) edge node[left] {$\mathbf{Q}^{1/2}_k$} ([xshift=-0.1cm]b.north);
-\path[<-,thick] ([xshift=0.1cm]a.south) edge node[right] {$\left(\mathbf{Q}^{1/2}_k\right)^{-1}$} ([xshift=0.1cm]b.north);
-\path[<-,thick,bend left=50] ([yshift=0.1cm]a.east) edge node[right,xshift=0.2cm] {$\left(\mathbf{P}^{1/2}_k\right)^{-1}$} ([xshift=0.1cm]d.north);
-\path[->,thick,bend left=50] ([yshift=-0.1cm]a.east) edge node[left,xshift=0.4cm,yshift=-0.8cm] {$\mathbf{P}^{1/2}_k$} ([xshift=-0.1cm]d.north);
-\path[->,thick] (b.east) edge node[right,yshift=0.2cm,xshift=-0.2cm] {$\mathbf{U}$} ([yshift=0.2cm]d.west);
-\path[<-,thick] (b.west) edge node[left,yshift=0.2cm] {$\mathbf{U}^\mathrm{T}$} ([yshift=0.2cm]c.east);
-\path[<-,thick] ([yshift=0.1cm]c.east) edge node[above] {$\mathbf{B}^{-1}$} ([yshift=0.1cm]d.west);
-\path[->,thick] ([yshift=-0.1cm]c.east) edge node[below] {$\mathbf{B}$} ([yshift=-0.1cm]d.west);
-\path[->,thick] ([xshift=0.1cm]c.south) edge node[right] {$\mathbf{C}^{-1}_k$} ([xshift=0.1cm]e.north);
-\path[<-,thick] ([xshift=-0.1cm]c.south) edge node[left] {$\mathbf{C}_k$} ([xshift=-0.1cm]e.north);
-\path[<-,thick,bend left=-30] ([yshift=0.1cm]e.east) edge node[above] {$\mathbf{P}_k^{-1}$} ([xshift=-0.12cm]d.south);
-\path[->,thick,bend left=-30] ([yshift=-0.1cm]e.east) edge node[below] {$\mathbf{P}_k$} ([xshift=0.12cm]d.south);
-
-\path[-,thick,dashed] ([xshift=-2cm]leftside.east) edge node[above] {Lanczos algorithm} ([xshift=2cm]rightside.west);
-\path[-,thick,dashed] ([xshift=-2cm]leftside.east) edge node[below] {PLanczosIF algorithm} ([xshift=2cm]rightside.west);
-\path[-,thick,dashed] ([yshift=-5cm]bottomsideleft.north) edge node {} ([yshift=2.7cm]topsideleft.south);
-\path[-,thick,dashed] ([yshift=-5cm]bottomsideright.north) edge node {} ([yshift=2.7cm]topsideright.south);
-
-\path[-,thick,bend left=-50] (a.north) edge node {} (ortho_lanczos.east);
-\path[->,thick,bend left=-50] (ortho_lanczos.south) edge node {} (a.west);
-\path[-,thick,bend left=-50] (e.west) edge node {} (ortho_planczosif.north);
-\path[->,thick,bend left=-50] (ortho_planczosif.east) edge node {} (e.south);
-\end{tikzpicture}
-\end{center}
-\caption{Map of spaces and links between them. Circles indicate orthogonality properties.}
-\label{fig:map}
-\end{figure}
-
-\FloatBarrier
-
-
-
-
-
-With the full $\mathbf{B}$ preconditioning, $\mathbf{B}^{-1}$ can be applied on both side of equation \eqref{eq:back_inc}:
-\begin{align}
-\label{eq:back_inc_B}
-\boxed{\delta \overline{\mathbf{x}}^b_k = - \sum_{i=1}^{k-1} \delta \overline{\mathbf{x}}^a_i}
-\end{align}
-and with the square-root $\mathbf{B}$ preconditioning, 
-
-
-\begin{align}
-\delta \mathbf{x}^a_k = \mathbf{B}_k \delta \overline{\mathbf{x}}^a_k
-\end{align}
-or
-
-\begin{align}
-\label{eq:correct_dxb}
-\delta \overline{\mathbf{x}}^b_k & = \mathbf{B}^{-1}_k \delta \mathbf{x}^b_k \nonumber \\
-& = \mathbf{B}^{-1}_k \left(\mathbf{x}^b_k - \mathbf{x}^g_k\right) \nonumber \\
-& = \mathbf{B}^{-1}_k \mathbf{T}^\mathbf{x}_{K \rightarrow k} \left(\mathbf{x}^b - \mathbf{x}^{g+}_k\right)
-\end{align}
-or
-
-\begin{align}
-\label{eq:back_inc_Bvar}
-\boxed{\delta \overline{\mathbf{x}}^b_k = - \sum_{i=1}^{k-1} \mathbf{T}^\mathbf{x}_{i \rightarrow k} \delta \overline{\mathbf{x}}^a_i}
-\end{align}
-and
-
-\begin{align}
-\label{eq:consistent_B}
-\delta \mathbf{x}^b_k & = \mathbf{B}_k \delta \overline{\mathbf{x}}^b_k
-\end{align}
-or
-
-
-
-\section{Preconditionings equivalence}
-
-When the resolution changes between outer iterations, the equivalence between full $\mathbf{B}$ and square-root $\mathbf{B}$ preconditionings is not guaranteed anymore. This section looks for equivalence conditions.
-
-\subsection{Equivalence condition on the guess}
-Two kinds of conditions can be required to get similar results with both preconditionings:
-\begin{enumerate}
-\item $\delta \mathbf{x}^{a+}_{k-1}$ has to be computed in a similar way for both preconditionings. This condition is sufficient for the theoretical method. It is not required for the consistent method, for which $\delta \mathbf{x}^{a+}_{k-1}$ is not required.
-\item For the standard and consistent methods, equations \eqref{eq:back_inc_Bvar} and \eqref{eq:back_inc_Uvar} are related with:
-\begin{align}
-\mathbf{U}^\mathrm{T}_k \delta \overline{\mathbf{x}}^b_k & = \delta \mathbf{v}^b_k \nonumber \\
-\Leftrightarrow \ - \mathbf{U}^\mathrm{T}_k  \sum_{i=1}^{k-1} \mathbf{T}^\mathbf{x}_{i \rightarrow k} \delta \overline{\mathbf{x}}^a_i & = - \sum_{i=1}^{k-1} \mathbf{T}^\mathbf{v}_{i \rightarrow k} \delta \mathbf{v}^a_i
-\end{align}
-If the previous outer iterations were equivalent for both preconditionings, then for $i \in [1,k-1, \delta \mathbf{v}^a_i = \mathbf{U}^\mathrm{T}_i \delta \overline{\mathbf{x}}^a_i$ so this condition becomes:
-\begin{align}
-\mathbf{U}^\mathrm{T}_k \mathbf{T}^\mathbf{x}_{i \rightarrow k} = \mathbf{T}^\mathbf{v}_{i \rightarrow k} \mathbf{U}^\mathrm{T}_i
-\end{align}
-which is the same as the condition \eqref{eq:projective_definition_U} for a projective $\mathbf{B}$ family.
-\end{enumerate}
-
-\subsection{Equivalence condition on Ritz vectors}
-If the resolution changes, the equivalence condition for preconditioners \eqref{eq:eq_cond_1} must be adapted since $\mathbf{U}$ depends on $k$:
-\begin{align}
-\mathbf{P}^{1/2}_k = \mathbf{Q}^{1/2}_k \mathbf{U}_k
-\end{align}
-In the case where the preconditioners are built using Ritz vectors, the map of Figure \ref{fig:map} shows that this condition is equivalent to a relation between the Ritz vectors:
-\begin{align}
-\mathbf{W}_k\underline{\overline{\mathbf{V}}}_k = \underline{\widetilde{\mathbf{V}}}_k
-\end{align}
-with $\mathbf{W}_k = \left(\mathbf{Q}^{1/2}_k\right)^{-1} \mathbf{U}^\mathrm{T}_k \mathbf{C}_k$.\\
-
-If the resolution changes, the Ritz vectors also require an interpolation from their original resolution to the resolution $\mathcal{R}_k$ in order to build the preconditioner for iteration $k$, so the condition becomes:
-\begin{align}
-\mathbf{W}_k \mathbf{T}^\mathbf{x}_{i \rightarrow k} \underline{\overline{\mathbf{V}}}_i = \mathbf{T}^\mathbf{v}_{i \rightarrow k} \underline{\widetilde{\mathbf{V}}}_i
-\end{align}
-which is verified if and only if:
-\begin{align}
-\label{eq:eq_cond_3}
-\mathbf{W}_k \mathbf{T}^\mathbf{x}_{i \rightarrow k} = \mathbf{T}^\mathbf{v}_{i \rightarrow k} \mathbf{W}_i
-\end{align}
-A last set of conditions regarding the orthogonality of Ritz vectors, which should not be lost during the interpolation process, should be verified:
-\begin{align}
-\label{eq:eq_cond_4}
-\left(\mathbf{T}^\mathbf{x}_{i \rightarrow k} \underline{\overline{\mathbf{V}}}_i\right)^\mathrm{T} \mathbf{P}_k\left(\mathbf{T}^\mathbf{x}_{i \rightarrow k} \underline{\overline{\mathbf{V}}}_i\right) = \mathbf{I}_{I_k}
-\end{align}
-and
-\begin{align}
-\label{eq:eq_cond_5}
-\left(\mathbf{T}^\mathbf{v}_{i \rightarrow k} \underline{\widetilde{\mathbf{V}}}_i\right)^\mathrm{T} \left(\mathbf{T}^\mathbf{v}_{i \rightarrow k} \underline{\widetilde{\mathbf{V}}}_i\right) = \mathbf{I}_{I_k}
-\end{align}
-
-\section{Equivalence overview}
-This section gives an overview of equivalences between methods and preconditioning. It focuses on the guess conditions, and assumes that Ritz vectors are not used. In the following arrays, a green checkmark \textcolor{green}{\cmark} indicates that results are similar, and a red cross \textcolor{red}{\xmark} indicates that results are different. Obviously, all methods and preconditionings give the same results for the first outer iteration, so the equivalence arrays are shown for $k>1$ only. For the theoretical and standard methods, we can use either the complete expressions of equations \eqref{eq:transitive_condition_B}-\eqref{eq:transitive_condition_U} or the simplified expressions of equations \eqref{eq:projective_condition_B}-\eqref{eq:projective_condition_U} to compute $\delta \mathbf{x}^{a+}_{k-1}$.
